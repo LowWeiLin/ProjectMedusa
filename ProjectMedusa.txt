@@ -1,0 +1,22 @@
+Modified Game of Snake
+
+round robin ticking
+
+Game
+--num_players
+--ticker
+--board
+--input
+--graphics
+
+Input Module
+--keyboard
+--network
+
+
+
+Network Module
+
+
+
+
