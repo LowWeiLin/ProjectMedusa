@@ -4,6 +4,13 @@
  *
  */
 
+var DEBUG = false;
+var socket = io.connect('http://127.0.0.1:3000');
+
+socket.on("welcome", function (data) {
+    console.log(data.text); // welcome test msg
+});
+
 //Main Game class.
 function Game(){
     this.num_players = 0;
@@ -26,7 +33,7 @@ Game.prototype.init = function(p_num_players){
     //TODO: initialize players
     this.initplayers();
     
-    console.log("Game Initialized.");
+    if (DEBUG) console.log("Game Initialized.");
 }
 
 //Initialize Players
@@ -37,7 +44,7 @@ Game.prototype.initplayers = function(){
         this.player_array[i].spawn(5,3);
     }
     
-    console.log("Player(s) Initialized : "+this.numplayers);
+    if (DEBUG) console.log("Player(s) Initialized : "+this.numplayers);
 }
 
 //Initialize Board parameters
@@ -53,7 +60,7 @@ Game.prototype.init_board = function(x,y){
         }   
     }
     
-    console.log("Board Initialized");
+    if (DEBUG) console.log("Board Initialized");
 }
 
 //Clear Board
@@ -65,12 +72,12 @@ Game.prototype.clear_board = function(x,y){
         }   
     }
     
-    console.log("Board Cleared");
+    if (DEBUG) console.log("Board Cleared");
 }
 
 //Print Board
 Game.prototype.print_board = function(){ 
-    console.log("Printing Board");
+    if (DEBUG) console.log("Printing Board");
     
      var textboard="";
     
@@ -79,7 +86,7 @@ Game.prototype.print_board = function(){
         for(var j=0 ; j<this.board_x ; j++){
             line+=this.board[i][j];
         }
-        console.log(line);
+        if (DEBUG) console.log(line);
         textboard+=line;
         textboard+="<br>";
     }
@@ -92,7 +99,7 @@ Game.prototype.print_board = function(){
 
 //Update Board
 Game.prototype.update_board = function(){ 
-    console.log("Updating Board");
+    if (DEBUG) console.log("Updating Board");
     
     for(var i=0 ; i<this.player_array.length ; i++){
         this.player_array[i].body.itr_reset();
@@ -111,8 +118,9 @@ Game.prototype.player_input = function(player, direction){
 
 //On Ready
 $(document).ready(function(){
-   var board=$("<pre id=\"board\"></pre>").text("Text.");
-   $("body").append(board);
+   // var board=$("<pre id=\"board\"></pre>").text("Text.");
+   // $("body").append(board);
+   $("#input").val("var a = 1;\n(function (){\n    return a++;\n})();");
 });
 
 //Code to execute.
@@ -158,4 +166,41 @@ function repeat(){
     game0.update_board();
     game0.print_board();
     setTimeout(repeat, 200);
+
+    var result = parseInt(eval($("#input").val()));
+
+    // new Function() evalutes code in local scope
+    // needs a "return result" statement
+
+    // var temp = new Function("result", $("#input").val());
+    // var result = parseInt(temp())
+    
+    $("#result").html("Evaluated result: " + result + " (" + directionToString(result) + ")");
+
+    socket.emit('result', result, function (np) {
+        if (np) {
+            // evaluated result received by server successfully
+        } else {
+            console.log("Error with evaluated result!");
+        }
+    });
+
+}
+
+socket.on("affirmative", function (data) {
+    var result = parseInt(data.text);
+    console.log("Server response: " + result + " (" + directionToString(result) + ")"); // verification message
+});
+
+function directionToString (direction) {
+    switch(direction) {
+        case 0:
+            return "south";
+        case 1:
+            return "east";
+        case 2:
+            return "north";
+        case 3:
+            return "west";
+    }
 }

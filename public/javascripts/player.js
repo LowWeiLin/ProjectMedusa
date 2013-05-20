@@ -10,6 +10,8 @@ var DIR = [[0,1],//up
            [0,-1],//down
            [-1,0]]//left
 
+var DEBUG = false;
+
 //Player Class
 function Player(n, x, y){
     this.number = n;
@@ -30,7 +32,7 @@ Player.prototype.spawn = function(x,y){
     for(var i=0 ; i<this.length ; i++){
         this.body.AddToTail([x-i,y]);
     }
-    console.log("Player "+this.number+" spawned.");
+    if (DEBUG) console.log("Player "+this.number+" spawned.");
 }
 
 Player.prototype.setDir = function(dir){
