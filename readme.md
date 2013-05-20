@@ -7,9 +7,10 @@ Instructions to run:
 
 (Requires Node.js)
 
-`git clone`
-`npm install`
-`node app`
+- `git clone`
+- `npm install`
+- `node app`
+- Navigate to `127.0.0.1:3000` with your browser
 
 ---
 
