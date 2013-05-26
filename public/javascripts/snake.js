@@ -76,10 +76,10 @@ Game.prototype.clear_board = function(x,y){
 }
 
 //Print Board
-Game.prototype.print_board = function(){ 
+Game.prototype.print_board = function(){
     if (DEBUG) console.log("Printing Board");
     
-     var textboard="";
+    var textboard="";
     
     for(var i=0 ; i<this.board_y ; i++){
         var line = "";
@@ -92,9 +92,18 @@ Game.prototype.print_board = function(){
     }
     
     //Write on window.
+    // $("#board").html(textboard);
 
+    // Draw board to canvas
+    function translate (matrix) {
+        return matrix.map(function (row) {
+            return row.map(function (cell) {
+                return cell === 'S';
+            });
+        });
+    }
 
-    $("#board").html(textboard);
+    drawBoard(translate(this.board));
 }
 
 //Update Board
@@ -121,15 +130,61 @@ $(document).ready(function(){
    // var board=$("<pre id=\"board\"></pre>").text("Text.");
    // $("body").append(board);
    $("#input").val("var a = 1;\n(function (){\n    return a++;\n})();");
+
+
+    // only start game when canvas is fully loaded
+
+    //Code to execute.
+    var game0 = new Game();
+    game0.init(1);
+    game0.init_board(10,10);
+    game0.initplayers();
+    console.clear();
+
+    setkeydir();
+    repeat();
+    function setkeydir(){
+        game0.player_array[0].setDir(key_dir);
+        setTimeout(setkeydir, 200);
+    }
+
+    function repeat(){
+        console.clear();
+        game0.player_array[0].blindmove();
+        game0.clear_board();
+        game0.update_board();
+        game0.print_board();
+        setTimeout(repeat, 200);
+
+        var result = parseInt(eval($("#input").val()));
+
+        // new Function() evalutes code in local scope
+        // needs a "return result" statement
+
+        // var temp = new Function("result", $("#input").val());
+        // var result = parseInt(temp())
+        
+        $("#result").html("Evaluated result: " + result + " (" + directionToString(result) + ")");
+
+        socket.emit('result', result, function (np) {
+            if (np) {
+                // evaluated result received by server successfully
+            } else {
+                console.log("Error with evaluated result!");
+            }
+        });
+
+    }
+
 });
 
-//Code to execute.
-var game0 = new Game();
-game0.init(1);
-game0.init_board(10,10);
-game0.initplayers();
-console.clear();
-
+// prevent scrolling of browser window; temp fix for layout issues
+window.addEventListener("keydown", function(e) {
+    // space and arrow keys
+    if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+        e.preventDefault();
+    }
+}, false);
 
 var key_dir=1;
 $(document).keydown(function(e){
@@ -148,44 +203,6 @@ $(document).keydown(function(e){
                 break;
         }
 })
-
-
-
-
-setkeydir();
-repeat();
-function setkeydir(){
-    game0.player_array[0].setDir(key_dir);
-    setTimeout(setkeydir, 200);
-}
-
-function repeat(){
-    console.clear();
-    game0.player_array[0].blindmove();
-    game0.clear_board();
-    game0.update_board();
-    game0.print_board();
-    setTimeout(repeat, 200);
-
-    var result = parseInt(eval($("#input").val()));
-
-    // new Function() evalutes code in local scope
-    // needs a "return result" statement
-
-    // var temp = new Function("result", $("#input").val());
-    // var result = parseInt(temp())
-    
-    $("#result").html("Evaluated result: " + result + " (" + directionToString(result) + ")");
-
-    socket.emit('result', result, function (np) {
-        if (np) {
-            // evaluated result received by server successfully
-        } else {
-            console.log("Error with evaluated result!");
-        }
-    });
-
-}
 
 socket.on("affirmative", function (data) {
     var result = parseInt(data.text);

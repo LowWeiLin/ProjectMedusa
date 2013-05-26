@@ -1,3 +1,9 @@
+#display {
+    border: solid black 1px;
+    width: 800px;
+    height: 600px;
+}
+
 body {
   padding: 50px;
   font: 14px "Consolas", Helvetica, Arial, sans-serif;
