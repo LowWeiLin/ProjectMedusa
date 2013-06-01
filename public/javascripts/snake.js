@@ -13,6 +13,9 @@ socket.on("welcome", function (data) {
 
 //Main Game class.
 function Game(){
+    
+    
+    
     this.num_players = 0;
     this.game_speed = 0;
     this.board_x = 30;
@@ -212,12 +215,14 @@ socket.on("affirmative", function (data) {
 function directionToString (direction) {
     switch(direction) {
         case 0:
-            return "south";
+            return "South";
         case 1:
-            return "east";
+            return "East";
         case 2:
-            return "north";
+            return "North";
         case 3:
-            return "west";
+            return "West";
+        default:
+            return "Error";
     }
 }
