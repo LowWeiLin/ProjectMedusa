@@ -14,11 +14,11 @@ var DEBUG = false;
 
 //Player Class
 function Player(n, x, y){
-    this.number = n;
-    this.body = null;
-    this.alive = false;
-    this.length = 5;
-    this.board_x = x;
+    this.number = n;        //id/number of player
+    this.body = null;       //array of [x,y]//TODO: change this.
+    this.alive = false;     //Boolean
+    this.length = 5;        //int, length of snake.
+    this.board_x = x;       //
     this.board_y = y;
     
     this.movedir = 1;//0,1,2,3 - up right down left

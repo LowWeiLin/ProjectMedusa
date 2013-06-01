@@ -14,23 +14,24 @@ socket.on("welcome", function (data) {
 //Main Game class.
 function Game(){
     
+    this.state = new GameState();
     
+    this.state.num_players = 0;
+    this.state.game_speed = 0;
+    this.state.board_x = 30;
+    this.state.board_y = 20;
+    this.state.running = false;
+    this.state.player_array = null;//Array of players
     
-    this.num_players = 0;
-    this.game_speed = 0;
-    this.board_x = 30;
-    this.board_y = 20;
     this.board = null;
-    this.running = false;
     
-    this.player_array = null;//Array of players
     
 }
 //Initialize Game parameters
 Game.prototype.init = function(p_num_players){
-    this.numplayers = p_num_players;
-    this.game_speed = 1000;
-    this.running = false;
+    this.state.numplayers = p_num_players;
+    this.state.game_speed = 1000;
+    this.state.running = false;
     this.board = null;
     
     //TODO: initialize players

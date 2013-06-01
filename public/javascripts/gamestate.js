@@ -12,5 +12,5 @@ function GameState(){
     this.board_x = 30;          //int
     this.board_y = 20;          //int
     this.running = false;       //boolean
-    this.player_array = null;   //Array of .players
+    this.player_array = null;   //Array of player class
 }
