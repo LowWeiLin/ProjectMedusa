@@ -59,7 +59,6 @@ Player.prototype.addhead = function(){
     this.body.AddToHead(this.nextmove());
 }
 
-
 Player.prototype.blindmove = function(){
     this.removetail();
     this.addhead();
