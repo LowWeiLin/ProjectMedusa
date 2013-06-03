@@ -216,7 +216,38 @@ $(document).keydown(function(e){
                 break;
         }
 })
+/*
+ *      Client side handlers
+ *
+ */
+//Welcome msg
+socket.on("welcome", function (data) {
+    console.log("Welcome message: " + data.text);
+    console.log("Attempting to set username");
+    socket.emit('setname',"guest");//set username, send to server.
+});
 
+//Setname
+socket.on("setname", function (data) {
+    console.log("Set username result: " + data);
+    if( data != null ){
+        //success, set username on client side
+    } else {
+        //failed. implement error code? already exists, invalid characters, etc.
+    }
+});
+
+//Chat
+function sendmsgtoall(msg){
+    console.log('sending some rubbish message');
+    socket.emit('chat',{target:'all',message:msg});
+}
+socket.on("chat", function (data) {
+    alert("Message: ["+data.source+"]"+ data.message);
+});
+
+
+//
 socket.on("affirmative", function (data) {
     var result = parseInt(data.text);
     console.log("Server response: " + result + " (" + directionToString(result) + ")"); // verification message
