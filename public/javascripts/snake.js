@@ -227,6 +227,10 @@ socket.on("welcome", function (data) {
     socket.emit('setname',"guest");//set username, send to server.
 });
 
+function setname(name){
+    socket.emit('setname',name);
+}
+
 //Setname
 socket.on("setname", function (data) {
     console.log("Set username result: " + data);
@@ -244,6 +248,11 @@ function sendmsgtoall(msg){
 }
 socket.on("chat", function (data) {
     alert("Message: ["+data.source+"]"+ data.message);
+});
+
+//Changestate
+socket.on("changestate", function (data) {
+    //change state to data.state
 });
 
 

@@ -43,7 +43,13 @@ var io = require("socket.io").listen(server);
 //Set up users data
 var conn = require("./connections.js");
 var connections = conn.connections;
+if(server_DEBUG) console.log("Connections table ready.");
 
+//Set up rooms data
+var rooms = require("./public/javascripts/rooms.js");
+rooms = rooms.rooms;
+rooms.initialize(connections);
+if(server_DEBUG) console.log("Rooms table ready.");
 
 
 /*
@@ -56,12 +62,13 @@ io.sockets.on("connection", function (socket) {
     //Register user in connections
     if(server_DEBUG) console.log("Registering new connection.");
     
-    connections.users[socket] = new connections.user();
+    connections.users[socket.id] = new connections.user(socket);
     
     //1. Setname
     socket.on("setname", function(_name){
         if(server_DEBUG) console.log("Request to setname to " + _name + " recv.");
-        if(connections.users[socket].setname(_name) == true ){
+        if(connections.users[socket.id].setname(_name) == true ){
+
             socket.emit("setname",{name:_name});
             socket.emit("changestate",{state:1});
         } else {
@@ -72,13 +79,63 @@ io.sockets.on("connection", function (socket) {
     
     //2. Chat
     socket.on('chat', function(data){
-        
         //Global message
         if( data.target == 'all'){
-            io.sockets.emit('chat',{source:(connections.users[socket].username) ? connections.users[socket].username : 'Server'
-                            , message:data.message})
+            io.sockets.emit('chat',{source:(connections.users[socket.id].username) ? connections.users[socket.id].username : 'Server'
+                            , message:data.message});
         }
-        
+    });
+    
+    //3. Room commands
+    socket.on('room', function(data){
+        switch (data.request){
+            case 'create':
+                //Create a room
+                var _id = rooms.addroom();
+                if(_id == -1)
+                    socket.emit('room',{reply:'create',result:'failed'});
+                else
+                    socket.emit('room',{reply:'create',result:'succeed',id:_id});
+                break;
+            case 'list':
+                //Show list of avail rooms, perhps based on query/filter
+                break;
+            case 'join':
+                var number = data.id;
+                if(connections.users[socket.id].room == -1){//not already in a room
+                    //Join the room
+                    if(rooms.roomlist[number].join(socket.id)){//Able to join room
+                        //emit result.
+                        socket.emit('room',{reply:'join',result:'succeed',id:number});
+                        //change state of client
+                    }
+                } else {
+                    socket.emit('room',{reply:'join',result:'failed'});
+                    if(server_DEBUG){console.log("User "+connections.users[socket.id].username+" failed to join room "+number+"!");}
+                }
+                break;
+            //...
+            case 'startgame':
+                if(connections.users[socket.id].room != -1){//User has a room
+                    //Request game to start
+                    if(rooms.roomlist[connections.users[socket.id].room].startgame()){
+                        //Succeed
+                        if(server_DEBUG){console.log("Game start success!");}
+                        socket.emit('room',{reply:'startgame',result:'succeed'});
+                    }
+                    
+                    
+                } else {
+                    socket.emit('room',{reply:'startgame',result:'failed'});
+                    if(server_DEBUG){console.log("User "+connections.users[socket.id].username+" does not belog to any room to start game!");}
+                }
+                
+                break;
+            case 'leave':
+                break;
+            default:
+                break;
+        }
     });
     
     
