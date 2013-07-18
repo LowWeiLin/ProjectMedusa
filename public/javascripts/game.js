@@ -9,7 +9,9 @@ var game_DEBUG = true;
 
 //Import GameState class
 var GameState = require("./gamestate.js");
+var Player = require("./player.js");
 GameState = GameState.GameState;
+Player = Player.Player;
 console.log(GameState);
 
 function directionToString (direction) {
@@ -40,7 +42,8 @@ Game = function(){
     
     this.board = null;
     
-    
+    this.temp_count = 0;
+    this.temp = new Array();
 }
 //Initialize Game parameters
 Game.prototype.init = function(p_num_players){
@@ -150,7 +153,26 @@ Game.prototype.update_board = function(){
 }
 
 Game.prototype.player_input = function(player, direction){
-    this.state.player_array[0].setDir(direction);
+    
+    if(this.temp[player] != 1){
+        this.temp_count++;
+        this.temp[player] = 1;
+        this.state.player_array[player].setDir(direction);
+        
+    }
+    if(this.temp_count == this.state.num_players){
+        //Update state and send update to players
+            for(var i=0 ; i<this.state.player_array.length ; i++){
+                this.state.player_array.blindmove();
+            }
+        
+        //Clear temp
+        this.temp_count = 0;
+        this.temp = new Array();
+    }
+    //return state for sending to player.
+    return this.state;
+    
 }
 
 exports.Game = Game;

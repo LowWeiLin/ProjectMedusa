@@ -29,8 +29,16 @@ function connections(){
         this.state = _state;
     }
     
+    user.prototype.getstate = function(){
+        return this.state;
+    }
+    
     user.prototype.setroom = function(_room){
         this.room = _room;
+    }
+    
+    user.prototype.getroom = function(){
+        return this.room;
     }
 
     return this;

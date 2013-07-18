@@ -13,7 +13,7 @@ var DIR = [[0,1],//up
 var DEBUG = false;
 
 //Player Class
-function Player(n, x, y){
+Player = function(n, x, y){
     this.number = n;        //id/number of player
     this.body = null;       //array of [x,y]
     this.alive = false;     //Boolean
@@ -63,3 +63,5 @@ Player.prototype.blindmove = function(){
     this.removetail();
     this.addhead();
 }
+
+exports.Player = Player;

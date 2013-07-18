@@ -79,12 +79,25 @@ socket.on("setname", function (data) {
 
 
 //2. Chat
+    function sendmsg(){
+        sendmsgtoall($("#chatinput").val());
+        $("#chatinput").val('');
+    }
+    $(document).ready(function() {
+    $("#chatinput").keyup(function(e) {
+        if(e.keyCode == 13) {
+            sendmsg();
+        }
+    });
+});
     function sendmsgtoall(msg){
-        console.log('sending some rubbish message');
+        //console.log('sending some rubbish message');
         socket.emit('chat',{target:'all',message:msg});
+        $('#chat').val($('#chat').val()+'[Me]'+msg+'\n');
     }
 socket.on("chat", function (data) {
-    alert("Message: ["+data.source+"]"+ data.message);
+    //alert("Message: ["+data.source+"]"+ data.message);
+    $('#chat').val($('#chat').val()+'['+data.source+']'+data.message+'\n');
 });
 
 //3. Rooms
@@ -155,7 +168,10 @@ socket.on('room', function (data) {
             break;
     }
 });
-
+    //Send game input:
+    function sendinput(dir){
+        socket.emit('game',{msg:'input',value:dir});
+    }
 
 
 
@@ -180,6 +196,5 @@ function directionToString (direction) {
     }
 }
 
-setname("autodebug");
 createroom();
 startgame();

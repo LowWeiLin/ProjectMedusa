@@ -137,7 +137,23 @@ io.sockets.on("connection", function (socket) {
                 break;
         }
     });
-    
+    //Game Handlers?
+    socket.on('game',function(data){
+                        if(connections.users[socket.id].getstate() == 3){//if in game
+                            switch(data.msg){
+                                case 'input':
+                                    //send data.input to game
+                                    console.log("RECV INPUT FROM: "+socket.id);
+                                    //room->game->fn
+                                    var ret = rooms.getroom(connections.users[socket.id].getroom()).game.player_input(0,data.value);
+                                    socket.emit('room',{msg:'update',state:ret});
+                                    break;
+                                default:
+                                    break;
+                            };
+                        }
+                    
+                    });
     
     //
     socket.on("result", function (data, callback) {

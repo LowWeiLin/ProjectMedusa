@@ -35,6 +35,10 @@ function rooms(){
         }
     }
     
+    this.getroom = function(_num){
+        return this.roomlist[_num];
+    }
+    
     this.removeroom = function(roomid){
         //inform all players room is closing
         this.roomlist[roomid] = null;
@@ -81,21 +85,33 @@ function rooms(){
         //Start game with current players
         this.state = 2;
         this.game = new Game();
-        this.game.init(users.length);
+        this.game.init(this.users.length);
+        console.log("AAAAAAAAAAA"+this.users.length);
         this.game.init_board(10,10);
-        this.game.initplayers();
         //Now enter game loop and wait for all players input, then update and send updated state.
 
         //Send out start game signal/state to all players
         for(var i=0 ; i<this.users.length ; i++){
-            //YAWNZ iTS 2.30 am. but finally can start game. DEBUGZ LIKEZ HELLZ
             this.connections.users[this.users[i]].socket.emit('game',{msg:'start',state:this.game.state});//STATE
         }
         
-        //Add handlers for players input here
+        //Add handlers for players input here(maybe not here.)
+        /*
         for(var i=0 ; i<this.users.length ; i++){
-            this.connections.users[this.users[i]].socket.emit('game',{msg:'start',state:this.game.state});//STATE
-        }
+            this.connections.users[this.users[i]].socket.on('game',function(data){
+                                                        switch(data.msg){
+                                                            case 'input':
+                                                                //send data.input to game
+                                                                console.log("RECV INPUT FROM: "+this.connections.users[this.users[i]].socket.id);
+                                                                var ret = this.game.player_input(i,data.value);
+                                                                
+                                                                break;
+                                                            default:
+                                                                break;
+                                                        };
+                                                    
+                                                    });//STATE
+        }*/
         
         
         
@@ -107,7 +123,7 @@ function rooms(){
         //Remove handlers for players input
         
         for(var i=0 ; i<this.users.length ; i++){
-            connections.users[users[i]].socket.removeAllListeners('game');
+            connections.users[this.users[i]].socket.removeAllListeners('game');
         }
         
     }
