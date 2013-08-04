@@ -49,6 +49,7 @@ Player.prototype.nextmove = function(){
     //checking for collision? death?
         //Do in game engine.
     //return location of next move.
+    if (DEBUG) console.log('Blind Move, dir: ' + this.movedir);
     return [((this.board_x+(this.body[0][0]+DIR[this.movedir][0]))%this.board_x), ((this.board_y+(this.body[0][1]+DIR[this.movedir][1]))%this.board_y)];
 }
 
@@ -63,5 +64,6 @@ Player.prototype.blindmove = function(){
     this.removetail();
     this.addhead();
 }
-
-exports.Player = Player;
+if( typeof client == 'undefined'){
+    exports.Player = Player;
+}

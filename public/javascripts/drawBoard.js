@@ -23,16 +23,20 @@ $(function () {
     // drawBoard(matrix);
 });
 
+var dotsize = 50;
+
 function drawBoard (matrix) {
 
     if(project.activeLayer.hasChildren()) project.activeLayer.removeChildren();
 
-    var positions = drawGrid(70, 70, 10, 70);
+    var positions = drawGrid(0, 0, 10, dotsize);
+    
+    
     for (var i=0; i<positions.length; i++) {
         for (var j=0; j<positions[0].length; j++) {
             if (!matrix[i][j]) continue;
             var p = positions[i][j];
-            var rectangle = new Rectangle(p.x, p.y, 70, 70);
+            var rectangle = new Rectangle(p.x, p.y, dotsize, dotsize);
             var cornerSize = new Size(20, 20);
             var path = new Path.RoundRectangle(rectangle, cornerSize);
             path.fillColor = 'black';
@@ -42,6 +46,11 @@ function drawBoard (matrix) {
 }
 
 function drawGrid (x, y, side, cellSide) {
+    
+    //Draws Grid
+    //side = number of cells per side
+    //x,y = top left corner coords of the grid
+    //cellSide = width/height of each cell
     for (var i=0; i<=side; i++) {
         var line = new Path.Line(new Point(x, y + i * cellSide), new Point(x + side * cellSide, y + i * cellSide));
         line.strokeColor = 'black';

@@ -8,11 +8,14 @@
 var game_DEBUG = true;
 
 //Import GameState class
-var GameState = require("./gamestate.js");
-var Player = require("./player.js");
-GameState = GameState.GameState;
-Player = Player.Player;
-console.log(GameState);
+if( typeof client == 'undefined'){
+    var GameState = require("./gamestate.js");
+    var Player = require("./player.js");
+    
+    GameState = GameState.GameState;
+    Player = Player.Player;
+    console.log(GameState);
+}
 
 function directionToString (direction) {
     switch(direction) {
@@ -35,8 +38,8 @@ Game = function(){
     
     this.state.num_players = 0;
     this.state.game_speed = 0;
-    this.state.board_x = 30;
-    this.state.board_y = 20;
+    this.state.board_x = 10;
+    this.state.board_y = 10;
     this.state.running = false;
     this.state.player_array = null;//Array of players
     
@@ -47,7 +50,7 @@ Game = function(){
 }
 //Initialize Game parameters
 Game.prototype.init = function(p_num_players){
-    this.state.numplayers = p_num_players;
+    this.state.num_players = p_num_players;
     this.state.game_speed = 1000;
     this.state.running = false;
     this.board = null;
@@ -61,12 +64,12 @@ Game.prototype.init = function(p_num_players){
 //Initialize Players
 Game.prototype.initplayers = function(){
     this.state.player_array = new Array();
-    for(var i=0 ; i<this.state.numplayers ; i++){
+    for(var i=0 ; i<this.state.num_players ; i++){
         this.state.player_array[i] = new Player(i,this.state.board_x,this.state.board_y);
         this.state.player_array[i].spawn(5,3);
     }
     
-    if (game_DEBUG) console.log("Player(s) Initialized : "+this.state.numplayers);
+    if (game_DEBUG) console.log("Player(s) Initialized : "+this.state.num_players);
 }
 
 //Initialize Board parameters
@@ -85,8 +88,22 @@ Game.prototype.init_board = function(x,y){
     if (game_DEBUG) console.log("Board Initialized");
 }
 
+//For client side
+Game.prototype.alloc_board = function(){
+    this.board = new Array();
+    
+    for(var i=0 ; i<this.state.board_y ; i++){
+        this.board[i] = new Array();
+        for(var j=0 ; j<this.state.board_x ; j++){
+            this.board[i][j] = 'O';
+        }   
+    }
+    
+    if (game_DEBUG) console.log("Board Initialized");
+}
+
 //Clear Board
-Game.prototype.clear_board = function(x,y){
+Game.prototype.clear_board = function(){
 
     for(var i=0 ; i<this.state.board_y ; i++){
         for(var j=0 ; j<this.state.board_x ; j++){
@@ -143,27 +160,40 @@ Game.prototype.update_board = function(){
         }
     }*/
     for(var i=0 ; i<this.state.player_array.length ; i++){
-       
+       console.log(i);
         for(var j=0 ; j< this.state.player_array[i].body.length ; j++){
+            console.log(j);
             //Draw the body of the snake on the board
             var temp = this.state.player_array[i].body[j];
+            console.log('asd'+temp[1]);
             this.board[temp[1]][temp[0]] = 'S';
+            
         }
     }
 }
 
 Game.prototype.player_input = function(player, direction){
     
+    //Validate direction
+    if(direction<0 || direction>3){
+        //Invalid direction given. Ignore it and return state.
+        return this.state;
+    }
+    
     if(this.temp[player] != 1){
         this.temp_count++;
         this.temp[player] = 1;
         this.state.player_array[player].setDir(direction);
-        
     }
+    console.log('IN PLAYER INPUT'+this.temp_count+" "+this.state.num_players);
+    
+    var _up = false;//is the state updated? / all user input received?
     if(this.temp_count == this.state.num_players){
+        _up = true;
+        console.log('ALL PLAYER INPUT RECEIVED');
         //Update state and send update to players
             for(var i=0 ; i<this.state.player_array.length ; i++){
-                this.state.player_array.blindmove();
+                this.state.player_array[i].blindmove();
             }
         
         //Clear temp
@@ -171,8 +201,10 @@ Game.prototype.player_input = function(player, direction){
         this.temp = new Array();
     }
     //return state for sending to player.
-    return this.state;
-    
+    return {_updated:_up, _state:this.state};
 }
 
-exports.Game = Game;
+
+if( typeof client == 'undefined'){
+    exports.Game = Game;
+}

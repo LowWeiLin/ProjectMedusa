@@ -131,6 +131,10 @@ io.sockets.on("connection", function (socket) {
                 }
                 
                 break;
+            case 'ready':
+                var _state = rooms.getroom(connections.users[socket.id].getroom()).game.state;
+                socket.emit('room',{msg:'start',state:_state});
+                break;
             case 'leave':
                 break;
             default:
@@ -145,8 +149,15 @@ io.sockets.on("connection", function (socket) {
                                     //send data.input to game
                                     console.log("RECV INPUT FROM: "+socket.id);
                                     //room->game->fn
-                                    var ret = rooms.getroom(connections.users[socket.id].getroom()).game.player_input(0,data.value);
-                                    socket.emit('room',{msg:'update',state:ret});
+                                    var _room = connections.users[socket.id].getroom(); //Room index of the user
+                                    var _roomUserIndex = rooms.getroom(_room).userindex(socket.id);    //Index of user in the room
+                                    var ret = rooms.getroom(_room).game.player_input(_roomUserIndex,data.value);
+                                    
+                                    //socket.emit('room',{msg:'update',state:ret._state});
+                                    if(ret._updated == true){
+                                        rooms.getroom(_room).emit('room',{msg:'update',state:ret._state});
+                                    }
+                                    
                                     break;
                                 default:
                                     break;

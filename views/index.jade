@@ -6,15 +6,20 @@ block content
         h1= title
         //- div#board
         canvas#display
+            
+    .chatdiv(style="float:left; margin:10px;")
         br
+        p Chat:
+        textarea#chat(readonly rows="25", cols="30", style='width:350px;resize:none;')
+        br
+        input#nameinput(style='width:70px;')
+        input#chatinput(style='width:280px;')
+        br
+        .miscdiv
+            p Room:
+            textarea#room(readonly rows="1", cols="5", style='width:50px;resize:none;')
+            button#start startgame
         .codediv
             p Code:
             textarea#input(rows="6", cols="30", style='width:350px;')
-            
-    .chatdiv(style="float:left; margin:10px; ")
-        br
-        p Chat:
-        textarea#chat(rows="6", cols="30", style='width:350px;')
-        br
-        input#chatinput(style='width:350px;')
     div#result

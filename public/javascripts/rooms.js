@@ -64,7 +64,7 @@ function rooms(){
         if(this.state == 0){
             this.users.push(userid);
             this.connections.users[userid].room = this.roomid;
-            console.log("HEREass"+this.users[0]);
+            //console.log("HEREass"+this.users[0]);
             return true;//succeed
         } else {
             return false;//failed
@@ -75,10 +75,22 @@ function rooms(){
         //remove player if exists
         for(var i=0 ; i<this.users.length ; i++){
             if( this.users[i] == userid ){
-                this.users = this.users.splice(i,1);
+                //this.users = this.users.splice(i,1);
+                //DO NOT REMOVE THE USER ID/CHANGE THE ORDER OF THE INDEXES. MARK IT AS DISCONNECTED INSTEAD.
+                
                 break;
             }
         }
+    }
+    
+    room.prototype.userindex = function(userid){
+        //Return index of user in array.
+        for(var i=0 ; i<this.users.length ; i++){
+            if( this.users[i] == userid ){
+                return i;
+            }
+        }
+        return -1;
     }
     
     room.prototype.startgame = function(){
@@ -86,13 +98,14 @@ function rooms(){
         this.state = 2;
         this.game = new Game();
         this.game.init(this.users.length);
-        console.log("AAAAAAAAAAA"+this.users.length);
+        //console.log("AAAAAAAAAAA"+this.users.length);
         this.game.init_board(10,10);
         //Now enter game loop and wait for all players input, then update and send updated state.
 
         //Send out start game signal/state to all players
         for(var i=0 ; i<this.users.length ; i++){
             this.connections.users[this.users[i]].socket.emit('game',{msg:'start',state:this.game.state});//STATE
+            //console.log(this.game.state);
         }
         
         //Add handlers for players input here(maybe not here.)
@@ -120,12 +133,20 @@ function rooms(){
     
     room.prototype.endgame = function(){
         //End game cleanup.
-        //Remove handlers for players input
         
+        
+    }
+    
+    room.prototype.emit = function(_name,_data){
+        //emit to users/sockets in room.
         for(var i=0 ; i<this.users.length ; i++){
-            connections.users[this.users[i]].socket.removeAllListeners('game');
+            connections.users[this.users[i]].socket.emit(_name,_data);
         }
-        
+    }
+    
+    room.prototype.sendchatmsg = function(_msg){
+        this.emit('chat',{source: 'Room '+roomid
+                            , message:data.message})
     }
     
 

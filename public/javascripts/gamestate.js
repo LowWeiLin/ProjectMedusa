@@ -16,5 +16,6 @@ GameState = function(){
         this.player_array = null;   //Array of player class
     
 }
-
-exports.GameState = GameState;
+if( typeof client == 'undefined'){
+    exports.GameState = GameState;
+}
