@@ -8,7 +8,8 @@ var DEBUG = true;
 
 
 //Connect to server
-var socket = io.connect('http://127.0.0.1:3000');
+//var socket = io.connect('http://127.0.0.1:3000');
+var socket = io.connect('http://lwl1991.no-ip.org:3000');
 
 //Client side data(should be same as connections.user data)
 var username = null;
@@ -178,7 +179,7 @@ socket.on('room', function (data) {
             }
             break;
         case 'startgame':
-            //Result from attempt to join room
+            //Signal to prepare and start game
             if(data.result == 'succeed'){
                 //Succeed
                 if(DEBUG){console.log("Started game!");}
@@ -255,4 +256,3 @@ function directionToString (direction) {
     }
 }
 
-//createroom();

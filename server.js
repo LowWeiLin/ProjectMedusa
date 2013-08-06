@@ -34,9 +34,14 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 
 //Set up server to listen for connections
+/*
 var server = http.createServer(app).listen(app.get('port'), "127.0.0.1", function(){
     console.log("Express server running at 127.0.0.1:" + app.get('port'));
+});*/
+var server = http.createServer(app).listen(app.get('port'), "0.0.0.0", function(){
+    console.log("Express server running at 0.0.0.0:" + app.get('port'));
 });
+
 var io = require("socket.io").listen(server);
 
 
@@ -86,6 +91,15 @@ io.sockets.on("connection", function (socket) {
         }
     });
     
+    
+    function sendstatetoroom(_room){
+        _room.game.update_state();
+        _room.emit('room',{msg:'update',state:_room.game.state});
+        if(true){//game not ended
+            setTimeout(function(){sendstatetoroom(_room)},_room.game.state.game_speed);
+        }
+    }
+    
     //3. Room commands
     socket.on('room', function(data){
         switch (data.request){
@@ -121,7 +135,12 @@ io.sockets.on("connection", function (socket) {
                     if(rooms.roomlist[connections.users[socket.id].room].startgame()){
                         //Succeed
                         if(server_DEBUG){console.log("Game start success!");}
-                        socket.emit('room',{reply:'startgame',result:'succeed'});
+                        
+                        //socket.emit('room',{reply:'startgame',result:'succeed'});
+                        
+                        //Send startgame signal to all users in room
+                        rooms.roomlist[connections.users[socket.id].room].emit('room',{reply:'startgame',result:'succeed'});
+                        
                     }
                     
                     
@@ -132,8 +151,16 @@ io.sockets.on("connection", function (socket) {
                 
                 break;
             case 'ready':
+                //
+                rooms.getroom(connections.users[socket.id].getroom()).game.run();
+                
                 var _state = rooms.getroom(connections.users[socket.id].getroom()).game.state;
                 socket.emit('room',{msg:'start',state:_state});
+                connections.users[socket.id].changestate(3);
+                
+                //repeated sending of state.
+                sendstatetoroom(rooms.getroom(connections.users[socket.id].getroom()));
+                
                 break;
             case 'leave':
                 break;
@@ -143,7 +170,7 @@ io.sockets.on("connection", function (socket) {
     });
     //Game Handlers?
     socket.on('game',function(data){
-                        if(connections.users[socket.id].getstate() == 3){//if in game
+                        if(connections.users[socket.id].getstate() === 3){//if in game
                             switch(data.msg){
                                 case 'input':
                                     //send data.input to game
@@ -154,9 +181,10 @@ io.sockets.on("connection", function (socket) {
                                     var ret = rooms.getroom(_room).game.player_input(_roomUserIndex,data.value);
                                     
                                     //socket.emit('room',{msg:'update',state:ret._state});
+                                    /*
                                     if(ret._updated == true){
                                         rooms.getroom(_room).emit('room',{msg:'update',state:ret._state});
-                                    }
+                                    }*/
                                     
                                     break;
                                 default:
@@ -166,7 +194,7 @@ io.sockets.on("connection", function (socket) {
                     
                     });
     
-    //
+    //Not used.
     socket.on("result", function (data, callback) {
         // result validation
         if (typeof data !== "number") {
@@ -177,7 +205,7 @@ io.sockets.on("connection", function (socket) {
             io.sockets.emit("affirmative", {text: data});
         }
     });
-    //
+    //Not used.
     socket.on("user message", function (data) {
         io.sockets.emit("user message", {
             nickname: socket.nickname,
@@ -185,14 +213,14 @@ io.sockets.on("connection", function (socket) {
         });
     });
     
-
+    /*Not used.
     socket.on("disconnect", function () {
         if (!socket.nickname) return;
         if (users.indexOf(socket.nickname) > -1) {
             users.splice(users.indexOf(socket.nickname), 1);
         }
         printConnectedUsers();
-    });
+    });*/
 });
 
 function printConnectedUsers() {

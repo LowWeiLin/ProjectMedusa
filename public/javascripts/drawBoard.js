@@ -25,7 +25,7 @@ $(function () {
 
 var dotsize = 50;
 
-function drawBoard (matrix) {
+function drawBoard (matrix,num_players) {
 
     if(project.activeLayer.hasChildren()) project.activeLayer.removeChildren();
 
@@ -34,12 +34,19 @@ function drawBoard (matrix) {
     
     for (var i=0; i<positions.length; i++) {
         for (var j=0; j<positions[0].length; j++) {
-            if (!matrix[i][j]) continue;
-            var p = positions[i][j];
-            var rectangle = new Rectangle(p.x, p.y, dotsize, dotsize);
-            var cornerSize = new Size(20, 20);
-            var path = new Path.RoundRectangle(rectangle, cornerSize);
-            path.fillColor = 'black';
+            if (matrix[i][j] == -1) continue;//empty cell
+            
+            if(matrix[i][j]>=0){//is a player
+                var p = positions[i][j];
+                var rectangle = new Rectangle(p.x, p.y, dotsize, dotsize);
+                var cornerSize = new Size(20, 20);
+                var path = new Path.RoundRectangle(rectangle, cornerSize);
+            
+                path.fillColor = 'red';
+                path.fillColor.hue += matrix[i][j]*(360/num_players);
+            }
+            
+            
         }
     }
     paper.view.draw();

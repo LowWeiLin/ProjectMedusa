@@ -8,11 +8,15 @@
 
 function connections(){
 
-    this.users = new Array(); 
+    this.users = new Array();
+    
+    this.getNumConnections = function(){
+        return this.users.length;
+    }
  
     user = function(sock){
         this.username = 'undefined';//Username to identify user
-        this.state = 3;             //0: homepage 1: room selection 2: Room settings 3: In Game 4: Scoreboard
+        this.state = 0;             //0: homepage 1: room selection 2: Room settings 3: In Game 4: Scoreboard
         this.room = -1;              //Room currently in
         this.player = null;         //Player object
         this.socket = sock;

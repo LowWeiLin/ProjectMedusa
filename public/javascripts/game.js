@@ -107,8 +107,8 @@ Game.prototype.clear_board = function(){
 
     for(var i=0 ; i<this.state.board_y ; i++){
         for(var j=0 ; j<this.state.board_x ; j++){
-            this.board[i][j] = 'O';
-        }   
+            this.board[i][j] = -1;
+        }
     }
     
     if (game_DEBUG) console.log("Board Cleared");
@@ -134,15 +134,17 @@ Game.prototype.print_board = function(){
     // $("#board").html(textboard);
 
     // Draw board to canvas
+    /* No need
     function translate (matrix) {
         return matrix.map(function (row) {
             return row.map(function (cell) {
                 return cell === 'S';
             });
         });
-    }
+    }*/
 
-    drawBoard(translate(this.board));
+    //drawBoard(translate(this.board));
+    drawBoard(this.board,this.state.num_players);
 }
 
 //Update Board
@@ -160,45 +162,64 @@ Game.prototype.update_board = function(){
         }
     }*/
     for(var i=0 ; i<this.state.player_array.length ; i++){
-       console.log(i);
+       if (game_DEBUG) console.log(i);
         for(var j=0 ; j< this.state.player_array[i].body.length ; j++){
-            console.log(j);
+            if (game_DEBUG) console.log(j);
             //Draw the body of the snake on the board
             var temp = this.state.player_array[i].body[j];
-            console.log('asd'+temp[1]);
-            this.board[temp[1]][temp[0]] = 'S';
+            this.board[temp[1]][temp[0]] = i;
             
         }
     }
 }
 
+Game.prototype.update_state = function(){
+    for(var i=0 ; i<this.state.player_array.length ; i++){
+        this.state.player_array[i].blindmove();
+    }
+    //Clear temp
+    this.temp_count = 0;
+    this.temp = new Array();
+}
+
+Game.prototype.run = function(){
+    this.state.running = true;
+}
+
+Game.prototype.stop = function(){
+    this.state.running = false;
+}
+
 Game.prototype.player_input = function(player, direction){
-    
+    //Validate game is running
+    if( !this.state.running ){
+        //Game not running. Ignore it and return state.
+        return this.state;
+    }
     //Validate direction
     if(direction<0 || direction>3){
         //Invalid direction given. Ignore it and return state.
         return this.state;
     }
-    
+    //Keep count of number of inputs received.
     if(this.temp[player] != 1){
         this.temp_count++;
         this.temp[player] = 1;
-        this.state.player_array[player].setDir(direction);
     }
-    console.log('IN PLAYER INPUT'+this.temp_count+" "+this.state.num_players);
+    //Set Direction for Player.
+    this.state.player_array[player].setDir(direction);
+    
+    if (game_DEBUG) console.log('PLAYER INPUT: P:'+player+" D:"+direction);
     
     var _up = false;//is the state updated? / all user input received?
     if(this.temp_count == this.state.num_players){
         _up = true;
-        console.log('ALL PLAYER INPUT RECEIVED');
+        if (game_DEBUG) console.log('ALL PLAYER INPUT RECEIVED');
         //Update state and send update to players
-            for(var i=0 ; i<this.state.player_array.length ; i++){
-                this.state.player_array[i].blindmove();
-            }
+        //-> Don't update. wait and update every tick instead.
+        //this.update_state();
         
-        //Clear temp
-        this.temp_count = 0;
-        this.temp = new Array();
+        
     }
     //return state for sending to player.
     return {_updated:_up, _state:this.state};
