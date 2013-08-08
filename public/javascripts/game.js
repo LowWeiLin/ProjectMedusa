@@ -43,20 +43,45 @@ Game = function(){
     this.state.running = false;
     this.state.player_array = null;//Array of players
     
-    this.board = null;
+    this.board = null;//ascii board
     
+    
+    //Game Mode
+    this.gameMode = 0;
+    
+    //Game Config
+    this.config = {};
+    this.config.dissapearOnDeath = true;
+    this.config.spawnFood = true;
+    this.config.collisions = true;
+    
+    
+    
+    //Keep track of number of objects in each cell per tick
+    this.numberGrid = new Array();
+    
+    //To keep track of who has sent input
     this.temp_count = 0;
     this.temp = new Array();
 }
 //Initialize Game parameters
 Game.prototype.init = function(p_num_players){
     this.state.num_players = p_num_players;
-    this.state.game_speed = 1000;
+    this.state.game_speed = 500;
     this.state.running = false;
     this.board = null;
     
-    //TODO: initialize players
+    //initialize players
     this.initplayers();
+    
+    //initialize numberGrid
+    for(var i=0 ; i<this.state.board_y ; i++){
+        this.numberGrid[i] = new Array();
+        for(var j=0 ; j<this.state.board_x ; j++){
+            this.numberGrid[i][j] = {};
+            this.numberGrid[i][j].n = 0;
+        }
+    }
     
     if (game_DEBUG) console.log("Game Initialized.");
 }
@@ -173,10 +198,70 @@ Game.prototype.update_board = function(){
     }
 }
 
-Game.prototype.update_state = function(){
-    for(var i=0 ; i<this.state.player_array.length ; i++){
-        this.state.player_array[i].blindmove();
+Game.prototype.clearNumberGrid = function(){
+    for(var i=0 ; i<this.state.board_y ; i++){
+        this.numberGrid[i] = new Array();
+        for(var j=0 ; j<this.state.board_x ; j++){
+            this.numberGrid[i][j] = {};
+            this.numberGrid[i][j].n = 0;
+        }
     }
+}
+
+Game.prototype.update_state = function(){
+    //Check if all players are dead...
+    var _alive = 0;
+    for(var i=0 ; i<this.state.player_array.length ; i++){
+        if(this.state.player_array[i].isAlive()){
+            _alive++;
+            break;
+        }
+    }
+    if(_alive == 0){//Alllll players are dead! What shall we do?
+        this.stop();
+        //Inform all players that game has ended?
+    }
+
+    //Update players,objects
+    for(var i=0 ; i<this.state.player_array.length ; i++){
+        //Update Players
+        if(this.state.player_array[i].isAlive()){
+            this.state.player_array[i].blindmove();
+        }
+        //Update Objects
+        
+    }    
+    
+    if(this.config.collisions == true){//If collisions enabled
+        //Clear numberGrid
+        this.clearNumberGrid();
+        //Add count to numberGrid
+        for(var i=0 ; i<this.state.player_array.length ; i++){
+            //Add Players
+            for(var j=0 ; j<this.state.player_array[i].body.length ; j++){
+                var _t = this.state.player_array[i].body[j];
+                this.numberGrid[_t[0]][_t[1]].n++;
+            }
+            //Add Objects
+            
+            
+        
+        //Check for collision
+            //Check player head.
+            var _t = this.state.player_array[i].body[0];
+            //Check collision with snakes
+            if(this.numberGrid[_t[0]][_t[1]].n>=2){
+                console.log('Collision!\nPlayer: '+i+'\nAt:'+_t+' ');
+                this.state.player_array[i].kill();
+            }
+            
+            //Check collision with objects
+            
+        }
+    
+        
+    }
+    
     //Clear temp
     this.temp_count = 0;
     this.temp = new Array();
@@ -184,6 +269,14 @@ Game.prototype.update_state = function(){
 
 Game.prototype.run = function(){
     this.state.running = true;
+}
+
+Game.prototype.isRunning = function(){
+    return this.state.running;
+}
+
+Game.prototype.pause = function(){
+    this.state.running = false;
 }
 
 Game.prototype.stop = function(){

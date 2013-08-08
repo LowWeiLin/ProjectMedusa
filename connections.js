@@ -33,7 +33,7 @@ function connections(){
         this.state = _state;
     }
     
-    user.prototype.getstate = function(){
+    user.prototype.getState = function(){
         return this.state;
     }
     

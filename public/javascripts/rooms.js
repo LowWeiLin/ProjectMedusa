@@ -56,15 +56,28 @@ function rooms(){
         this.game = null;           //Game instance in room
         this.state = 0;             //State of the room - 0: setting up 1: in game 2: score board/game end
         this.connections = null;
+        
+        this.validUsers = 0;
+        this.maxUsers = 10;
+        
+        
     }
     
     room.prototype.join = function(userid){
         //check if able to join, not already joined
         //TODO: the validation
-        if(this.state == 0){
+        if(this.getNumUsers<this.maxUsers){//Max users check
+            return false;
+        }
+        //Check user does not already have a room
+        if(this.connections.users[userid].room != -1){
+            return false;
+        }
+        
+        if(this.state == 0){//Room state check
             this.users.push(userid);
             this.connections.users[userid].room = this.roomid;
-            //console.log("HEREass"+this.users[0]);
+            this.validUsers++;
             return true;//succeed
         } else {
             return false;//failed
@@ -77,10 +90,38 @@ function rooms(){
             if( this.users[i] == userid ){
                 //this.users = this.users.splice(i,1);
                 //DO NOT REMOVE THE USER ID/CHANGE THE ORDER OF THE INDEXES. MARK IT AS DISCONNECTED INSTEAD.
-                
+                this.users[i] = -1;
                 break;
             }
         }
+    }
+    
+    room.prototype.getNumUsers = function(){
+        //Return number of user in room.
+        return this.users.length;
+    }
+    
+    room.prototype.getState = function(){
+        //Return state of room.
+        return this.state;
+    }
+    
+    room.prototype.setState = function(_state){
+        //Sets state of room
+        //validate here...
+        this.state = _state;
+    }
+    
+    room.prototype.allInState = function(_state){
+        //Check if all users in room is in specified state.
+        for(var i=0 ; i<this.users.length ; i++){
+            if( this.isValid(this.users[i]) ){
+                if(connections.users[this.users[i]].getState() != _state ){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     
     room.prototype.userindex = function(userid){
@@ -103,10 +144,12 @@ function rooms(){
         //Now enter game loop and wait for all players input, then update and send updated state.
 
         //Send out start game signal/state to all players
+        /*
         for(var i=0 ; i<this.users.length ; i++){
             this.connections.users[this.users[i]].socket.emit('game',{msg:'start',state:this.game.state});//STATE
             //console.log(this.game.state);
-        }
+        }*/
+        this.emit('game',{msg:'start',state:this.game.state});
         
         //Add handlers for players input here(maybe not here.)
         /*
@@ -140,8 +183,16 @@ function rooms(){
     room.prototype.emit = function(_name,_data){
         //emit to users/sockets in room.
         for(var i=0 ; i<this.users.length ; i++){
-            connections.users[this.users[i]].socket.emit(_name,_data);
+            if( this.isValid(this.users[i]) )
+                connections.users[this.users[i]].socket.emit(_name,_data);
         }
+    }
+    
+    room.prototype.isValid = function(_userid){
+        if(_userid != -1)
+            return true;
+        else
+            return false;
     }
     
     room.prototype.sendchatmsg = function(_msg){

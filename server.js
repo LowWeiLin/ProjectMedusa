@@ -93,9 +93,9 @@ io.sockets.on("connection", function (socket) {
     
     
     function sendstatetoroom(_room){
-        _room.game.update_state();
-        _room.emit('room',{msg:'update',state:_room.game.state});
-        if(true){//game not ended
+        if(_room.game.isRunning()){//game not ended
+            _room.game.update_state();
+            _room.emit('room',{msg:'update',state:_room.game.state});
             setTimeout(function(){sendstatetoroom(_room)},_room.game.state.game_speed);
         }
     }
@@ -105,11 +105,16 @@ io.sockets.on("connection", function (socket) {
         switch (data.request){
             case 'create':
                 //Create a room
+                if(connections.users[socket.id].room != -1){//User must not be currently in any room to create a room.
+                    socket.emit('room',{reply:'create',result:'failed'});
+                    break;
+                }
                 var _id = rooms.addroom();
                 if(_id == -1)
                     socket.emit('room',{reply:'create',result:'failed'});
                 else
                     socket.emit('room',{reply:'create',result:'succeed',id:_id});
+                
                 break;
             case 'list':
                 //Show list of avail rooms, perhps based on query/filter
@@ -151,15 +156,21 @@ io.sockets.on("connection", function (socket) {
                 
                 break;
             case 'ready':
-                //
-                rooms.getroom(connections.users[socket.id].getroom()).game.run();
                 
-                var _state = rooms.getroom(connections.users[socket.id].getroom()).game.state;
+                var _room = rooms.getroom(connections.users[socket.id].getroom());
+                var _state = _room.game.state;
+
+                
                 socket.emit('room',{msg:'start',state:_state});
                 connections.users[socket.id].changestate(3);
                 
-                //repeated sending of state.
-                sendstatetoroom(rooms.getroom(connections.users[socket.id].getroom()));
+                //repeated sending of state, once all users has sent ready message and set to state 3
+                if(_room.allInState(3)){
+                    _room.game.run();
+                    _room.setState(2);
+                    if(server_DEBUG){console.log("Start Sending state to room!")};
+                    sendstatetoroom(rooms.getroom(connections.users[socket.id].getroom()));
+                }
                 
                 break;
             case 'leave':
@@ -170,7 +181,7 @@ io.sockets.on("connection", function (socket) {
     });
     //Game Handlers?
     socket.on('game',function(data){
-                        if(connections.users[socket.id].getstate() === 3){//if in game
+                        if(connections.users[socket.id].getState() === 3){//if in game
                             switch(data.msg){
                                 case 'input':
                                     //send data.input to game

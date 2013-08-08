@@ -22,6 +22,11 @@ Player = function(n, x, y){
     this.board_y = y;
     
     this.movedir = 1;//0,1,2,3 - up right down left
+    
+    //
+    this.score = 0;
+    
+    
 }
 
 Player.prototype.spawn = function(x,y){
@@ -53,9 +58,14 @@ Player.prototype.nextmove = function(){
     return [((this.board_x+(this.body[0][0]+DIR[this.movedir][0]))%this.board_x), ((this.board_y+(this.body[0][1]+DIR[this.movedir][1]))%this.board_y)];
 }
 
+Player.prototype.getHead = function(){
+    return this.body[0];
+}
+
 Player.prototype.removetail = function(){
     this.body.pop();
 }
+
 Player.prototype.addhead = function(){
     this.body.unshift(this.nextmove());
 }
@@ -64,6 +74,15 @@ Player.prototype.blindmove = function(){
     this.removetail();
     this.addhead();
 }
+
+Player.prototype.isAlive = function(){
+    return this.alive;
+}
+
+Player.prototype.kill = function(){
+    this.alive = false;
+}
+
 if( typeof client == 'undefined'){
     exports.Player = Player;
 }
