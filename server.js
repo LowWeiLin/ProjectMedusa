@@ -92,12 +92,24 @@ io.sockets.on("connection", function (socket) {
     });
     
     
+    var update_array = new Array();
+    //var now = new Date();
+    
     function sendstatetoroom(_room){
+
         if(_room.game.isRunning()){//game not ended
             _room.game.update_state();
             _room.emit('room',{msg:'update',state:_room.game.state});
-            setTimeout(function(){sendstatetoroom(_room)},_room.game.state.game_speed);
+            //console.log('\n+\n+\n+\n+\n+\n'+update_array[_room.roomid]+'\n+\n+\n+\n+\n');
+            
+            //clearTimeout(update_array[_room.roomid]);
+            //update_array[_room.roomid] = setTimeout(function(){sendstatetoroom(_room)},_room.game.state.game_speed);
+        } else if(_room.game.hasEnded()){
+            clearInterval(update_array[_room.roomid]);
+            _room.emit('chat',{source:'Room '+_room.roomid
+                            , message:'Game Ended!'});
         }
+        
     }
     
     //3. Room commands
@@ -137,11 +149,21 @@ io.sockets.on("connection", function (socket) {
             case 'startgame':
                 if(connections.users[socket.id].room != -1){//User has a room
                     //Request game to start
+                    var _room = rooms.roomlist[connections.users[socket.id].room];
                     if(rooms.roomlist[connections.users[socket.id].room].startgame()){
+                        
+                        //bug fix..
+                        rooms.roomlist[connections.users[socket.id].room].setAllState(2);
+                        if(typeof update_array[_room.roomid]!='undefined')
+                            clearInterval(update_array[_room.roomid]);
+                        //^^^
+                        
+                        
                         //Succeed
                         if(server_DEBUG){console.log("Game start success!");}
                         
                         //socket.emit('room',{reply:'startgame',result:'succeed'});
+                        
                         
                         //Send startgame signal to all users in room
                         rooms.roomlist[connections.users[socket.id].room].emit('room',{reply:'startgame',result:'succeed'});
@@ -169,7 +191,13 @@ io.sockets.on("connection", function (socket) {
                     _room.game.run();
                     _room.setState(2);
                     if(server_DEBUG){console.log("Start Sending state to room!")};
-                    sendstatetoroom(rooms.getroom(connections.users[socket.id].getroom()));
+                    if(typeof update_array[_room.roomid]=='undefined')
+                        update_array[_room.roomid] = setInterval(function(){sendstatetoroom(_room)},_room.game.state.game_speed);
+                    else{
+                        clearInterval(update_array[_room.roomid]);
+                        update_array[_room.roomid] = setInterval(function(){sendstatetoroom(_room)},_room.game.state.game_speed);
+                    }
+
                 }
                 
                 break;
@@ -185,7 +213,7 @@ io.sockets.on("connection", function (socket) {
                             switch(data.msg){
                                 case 'input':
                                     //send data.input to game
-                                    console.log("RECV INPUT FROM: "+socket.id);
+                                    if(server_DEBUG) console.log("RECV INPUT FROM: "+socket.id);
                                     //room->game->fn
                                     var _room = connections.users[socket.id].getroom(); //Room index of the user
                                     var _roomUserIndex = rooms.getroom(_room).userindex(socket.id);    //Index of user in the room

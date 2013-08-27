@@ -81,7 +81,7 @@ Game.prototype.clear_board = function(x,y){
 
 //Print Board
 Game.prototype.print_board = function(){
-    if (DEBUG) console.log("Printing Board");
+    //if (DEBUG) console.log("Printing Board");
     
     var textboard="";
     
@@ -90,7 +90,7 @@ Game.prototype.print_board = function(){
         for(var j=0 ; j<this.state.board_x ; j++){
             line+=this.board[i][j];
         }
-        if (DEBUG) console.log(line);
+        //if (DEBUG) console.log(line);
         textboard+=line;
         textboard+="<br>";
     }
@@ -106,13 +106,14 @@ Game.prototype.print_board = function(){
             });
         });
     }
-
-    drawBoard(translate(this.board));
+    
+    
+    //drawBoard(translate(this.board));
 }
 
 //Update Board
 Game.prototype.update_board = function(){ 
-    if (DEBUG) console.log("Updating Board");
+    //if (DEBUG) console.log("Updating Board");
     
     /*
     for(var i=0 ; i<this.state.player_array.length ; i++){

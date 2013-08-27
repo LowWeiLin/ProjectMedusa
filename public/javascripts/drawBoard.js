@@ -29,7 +29,7 @@ function drawBoard (matrix,num_players) {
 
     if(project.activeLayer.hasChildren()) project.activeLayer.removeChildren();
 
-    var positions = drawGrid(0, 0, 10, dotsize);
+    var positions = DrawGrid(0, 0, 10, dotsize);
     
     
     for (var i=0; i<positions.length; i++) {
@@ -52,8 +52,7 @@ function drawBoard (matrix,num_players) {
     paper.view.draw();
 }
 
-function drawGrid (x, y, side, cellSide) {
-    
+function DrawGrid (x, y, side, cellSide) {
     //Draws Grid
     //side = number of cells per side
     //x,y = top left corner coords of the grid

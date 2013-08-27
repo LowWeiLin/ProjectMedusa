@@ -9,6 +9,8 @@ var DEBUG = true;
 
 //Connect to server
 var socket = io.connect('http://127.0.0.1:3000');
+
+//var socket = io.connect('http://172.28.178.105:3000');
 //var socket = io.connect('http://lwl1991.no-ip.org:3000');
 
 //Client side data(should be same as connections.user data)
@@ -100,6 +102,10 @@ socket.on("setname", function (data) {
                 startgame();    
             }
         )
+        $("#createroom").mouseup(function(){
+                createroom();
+            }
+        )
         
         
         $(document).keydown(function(e){
@@ -135,7 +141,7 @@ socket.on("setname", function (data) {
     }
 socket.on("chat", function (data) {
     //alert("Message: ["+data.source+"]"+ data.message);
-    $('#chat').val($('#chat').val()+'['+data.source+']'+data.message+'\n');
+    $('#chat').val($('#chat').val()+'['+data.source+'] '+data.message+'\n');
     //Keep textarea scrolled to bottom.
     $('#chat').scrollTop($('#chat')[0].scrollHeight);
 });
@@ -256,4 +262,9 @@ function directionToString (direction) {
     }
 }
 
-createroom();
+//createroom();
+
+$( document ).ready(function() {
+    drawinit();
+    draw(null);
+});

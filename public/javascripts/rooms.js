@@ -78,6 +78,11 @@ function rooms(){
             this.users.push(userid);
             this.connections.users[userid].room = this.roomid;
             this.validUsers++;
+            
+            //Emit to room to inform players someone joined.
+            this.emit('chat',{source:'Room '+this.roomid
+                            , message:this.connections.users[userid].username+' joined!'});
+            
             return true;//succeed
         } else {
             return false;//failed
@@ -112,6 +117,16 @@ function rooms(){
         this.state = _state;
     }
     
+    room.prototype.setAllState = function(_state){
+        //Set all users in room to specified state.
+        for(var i=0 ; i<this.users.length ; i++){
+            if( this.isValid(this.users[i]) ){
+                connections.users[this.users[i]].setState(_state);
+            }
+        }
+        return true;
+    }
+    
     room.prototype.allInState = function(_state){
         //Check if all users in room is in specified state.
         for(var i=0 ; i<this.users.length ; i++){
@@ -136,8 +151,11 @@ function rooms(){
     
     room.prototype.startgame = function(){
         //Start game with current players
-        this.state = 2;
         this.game = new Game();
+        this.game.room = this;
+        
+        this.state = 2;
+        
         this.game.init(this.users.length);
         //console.log("AAAAAAAAAAA"+this.users.length);
         this.game.init_board(10,10);
@@ -149,7 +167,12 @@ function rooms(){
             this.connections.users[this.users[i]].socket.emit('game',{msg:'start',state:this.game.state});//STATE
             //console.log(this.game.state);
         }*/
+        this.emit('chat',{source:'Room '+this.roomid
+                            , message:'Game Starting!'});
+            
+        
         this.emit('game',{msg:'start',state:this.game.state});
+        
         
         //Add handlers for players input here(maybe not here.)
         /*

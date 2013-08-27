@@ -5,7 +5,9 @@ block content
     .gamediv(style="float:left")
         h1= title
         //- div#board
-        canvas#display
+        //- canvas#display
+        #container
+     
             
     .chatdiv(style="float:left; margin:10px;")
         br
@@ -19,6 +21,7 @@ block content
             p Room:
             textarea#room(readonly rows="1", cols="5", style='width:50px;resize:none;')
             button#start startgame
+            button#createroom createroom
         .codediv
             p Code:
             textarea#input(rows="6", cols="30", style='width:350px;')
